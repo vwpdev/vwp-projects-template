@@ -1,0 +1,10 @@
+{
+  "watch": [
+    "server.ts",
+    "static/",
+    "router/",
+    "backend/GraphQL/",
+    "backend/GraphQL/*.ts"
+  ],
+  "exec": "export TSC_WATCHFILE=\"UseFsEventsOnParentDirectory\" export TSC_WATCHDIRECTORY=\"RecursiveDirectoryUsingFsWatchFile\"; rm -rf ./node_modules/.cache && npx tsc -p ./tsconfig.server.json && node dist/server.js"
+}
