@@ -6,7 +6,7 @@ export default function Database(): DatabaseService {
     }
     DatabseInstance = new DatabaseService({
         getDatabaseSettings() {
-            return "mongodb://localhost:27017/TodosDB"
+            return "mongodb://localhost:27017/TestDB"
         },
         getVersion() {
             return "test"
@@ -14,7 +14,7 @@ export default function Database(): DatabaseService {
         getEnvSettings() {
             return { port: "", host: "", api: "", app: "", entry: "", database: "" }
         },
-        getKey: () => "TodosDB",
+        getKey: () => "TestDB",
     });
     return DatabseInstance;
 }
