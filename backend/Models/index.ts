@@ -1,4 +1,3 @@
-import TodoList from "./TodoList";
 import fs from "fs";
 import path from "path";
 import { Express } from "express";
@@ -17,7 +16,6 @@ import { Express } from "express";
 
 
 export interface ModelsType {
-    TodoList: typeof TodoList;
     [key: string]: any;
 }
 let ServerModels: any = {};
