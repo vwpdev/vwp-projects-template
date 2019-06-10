@@ -65,6 +65,9 @@
       "@locale": [
         "./locale"
       ],
+      "@backend/*": [
+        "./backend/*"
+      ],
       "*": [
         "*"
       ]

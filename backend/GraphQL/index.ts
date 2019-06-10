@@ -1,17 +1,18 @@
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer, gql } from "apollo-server-express";
+import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 import { Express } from "express";
 import fs from "fs";
+import { DocumentNode } from "graphql";
 import { merge } from "lodash";
 import path from "path";
-import { DocumentNode } from "graphql";
+
 
 function getGqlString(doc: DocumentNode) {
     return doc.loc && doc.loc.source.body;
 }
 
 // const TypeDefs: any[] = [];
-export default function GraphQL(app: Express) {
-
+export default function GraphQL({ app, ctx }: { app: Express, ctx?: (req: ExpressContext) => any }) {
     let GlobalMutationResolver = {};
     let GlobalQueryResolver = {};
     let GlobalResolvers = {};
@@ -22,7 +23,7 @@ export default function GraphQL(app: Express) {
         .readdirSync(__dirname)
         .filter(dir => !(/^(index)/).test(dir))
         .map(dir => {
-            console.log("REGISTERING: =>", dir);
+            console.log("REGISTERING GRAPHQL : =>", dir);
 
             const { MutationResolvers, QueryResolvers, Self }: { QueryResolvers: any, MutationResolvers: any, Self: { Resolvers?: { [key: string]: any }, Fragment?: any } } = require(path.join(__dirname, dir)).default;
 
@@ -33,15 +34,15 @@ export default function GraphQL(app: Express) {
             if (Object.keys(MutationResolvers || {}).length) {
                 GlobalMutationResolver = { ...GlobalMutationResolver, ...MutationResolvers };
             }
-
-            if (Self.Resolvers && Self.Fragment) {
+            if (Self.Resolvers) {
                 GlobalResolvers = merge({ [dir.replace(/(\.js|\.ts)/ig, '').trim()]: Self.Resolvers });
+            }
+            if (Self.Fragment) {
                 GlobalTypeDefs.push(Self.Fragment)
             }
         });
-    const payload: any = {
-
-        typeDefs: `
+    const schema = new ApolloServer({
+        typeDefs: gql`
                 type Query { _empty: String   }
 
                 type Mutation { 
@@ -54,15 +55,13 @@ export default function GraphQL(app: Express) {
             Mutation: GlobalMutationResolver,
             Query: GlobalQueryResolver
         },
+        playground: true,
 
-        playground: {
-            endpoint: '/graphql',
-            settings: {
-                'editor.theme': 'light'
-            }
-        }
-    };
-    const schema = new ApolloServer(payload);
+        context: (req) => ({
+            ... (ctx ? ctx(req) : {})
+        })
+
+    });
 
     schema.applyMiddleware({
         app
