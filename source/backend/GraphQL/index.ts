@@ -23,10 +23,13 @@ export default function GraphQL({ app, ctx }: { app: Express, ctx?: (req: Expres
         .readdirSync(__dirname)
         .filter(dir => !(/^(index)/).test(dir))
         .map(dir => {
+            console.log("DIR", dir);
             console.log("REGISTERING GRAPHQL : =>", dir);
 
-            const { MutationResolvers, QueryResolvers, Self }: { QueryResolvers: any, MutationResolvers: any, Self: { Resolvers?: { [key: string]: any }, Fragment?: any } } = require(path.join(__dirname, dir)).default;
+            
 
+            const { MutationResolvers, QueryResolvers, Self }: { QueryResolvers: any, MutationResolvers: any, Self: { Resolvers?: { [key: string]: any }, Fragment?: any } } = require(path.join(__dirname, dir)).default;
+            console.log("TYPES")
             if (Object.keys(QueryResolvers || {}).length) {
                 GlobalQueryResolver = { ...GlobalQueryResolver, ...QueryResolvers };
             }
@@ -40,15 +43,22 @@ export default function GraphQL({ app, ctx }: { app: Express, ctx?: (req: Expres
             if (Self.Fragment) {
                 GlobalTypeDefs.push(Self.Fragment)
             }
+
         });
     const schema = new ApolloServer({
         typeDefs: gql`
-                type Query { _empty: String   }
+                type Query { 
+                        _empty: String  
+                }
 
                 type Mutation { 
                    _empty: String     
                 }
                 ${GlobalTypeDefs.map(getGqlString).join('\n\n')}
+                schema {
+                    query: Query
+                    mutation: Mutation
+                }
                `,
         resolvers: {
             ...GlobalResolvers,

@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { Express } from "express";
+import Todo from "./Todo";
 
 // import TodoList from './TodoList';
 
@@ -17,12 +18,10 @@ import { Express } from "express";
 
 export interface ModelsType {
     [key: string]: any;
+    Todo: typeof Todo
 }
 let ServerModels: any = {};
 export default function Models(server: Express): ModelsType {
-    // if (ServerModels) {
-    //     return ServerModels;
-    // }
     fs
         .readdirSync(__dirname)
         .filter((dir: string) => !(/^(index)/).test(dir))
